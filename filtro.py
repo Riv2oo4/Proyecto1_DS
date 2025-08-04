@@ -37,4 +37,32 @@ def limpiar_csv_con_encabezado_dinamico(ruta_archivo):
 
 ruta = "./Datos/AltaVerapaz.csv"  
 df_limpio = limpiar_csv_con_encabezado_dinamico(ruta)
-print(df_limpio.head(250))  
+
+
+import pandas as pd
+import os
+
+carpeta_datos = "./Datos"
+archivos = [f for f in os.listdir(carpeta_datos) if f.endswith(".csv")]
+dataframes = []
+
+os.makedirs("ReportesExcel", exist_ok=True)
+
+for nombre_archivo in archivos:
+    ruta = os.path.join(carpeta_datos, nombre_archivo)
+    try:
+        df = limpiar_csv_con_encabezado_dinamico(ruta)
+        df["ARCHIVO_ORIGEN"] = nombre_archivo 
+        dataframes.append(df)
+        print(f"Procesado: {nombre_archivo}")
+    except Exception as e:
+        print(f"Error en {nombre_archivo}: {e}")
+
+# Unificar todos en uno solo
+df_unificado = pd.concat(dataframes, ignore_index=True)
+
+# Guardar en un solo archivo Excel
+os.makedirs("ReportesExcel", exist_ok=True)
+df_unificado.to_excel("./ReportesExcel/TodosUnificados.xlsx", index=False)
+
+print("\nArchivo final generado: ReportesExcel/TodosUnificados.xlsx")

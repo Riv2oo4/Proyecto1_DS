@@ -1,40 +1,39 @@
 import pandas as pd
-import re
+import os
 
-# Ruta del archivo
-ruta = "./establecimiento.csv"
-salida_txt = "./reporte_datos_desalineados.txt"
+# Carpeta con los archivos CSV
+carpeta_datos = "./Datos"
+archivos = [f for f in os.listdir(carpeta_datos) if f.endswith(".csv")]
 
-# Leer las líneas
-with open(ruta, "r", encoding="latin1") as f:
-    lineas = [line.strip().strip('"') for line in f if line.strip()]
+# Carpeta de salida para los archivos Excel
+os.makedirs("ReportesExcel", exist_ok=True)
 
-# Buscar encabezados reales
-linea_encabezado = None
-for i, linea in enumerate(lineas):
-    if "CODIGO" in linea and "ESTABLECIMIENTO" in linea:
-        linea_encabezado = i
-        break
+for nombre_archivo in archivos:
+    ruta = os.path.join(carpeta_datos, nombre_archivo)
+    salida_excel = f"./ReportesExcel/resumen_{nombre_archivo.replace('.csv', '')}.xlsx"
 
-if linea_encabezado is None:
-    raise ValueError("No se encontró la línea de encabezados.")
+    try:
+        # Leer archivo como texto para buscar línea con encabezados
+        with open(ruta, "r", encoding="latin1") as f:
+            lineas = f.readlines()
 
-# Separar encabezados por espacios múltiples
-columnas = re.split(r"\s{2,}", lineas[linea_encabezado])
+        linea_encabezado = None
+        for i, linea in enumerate(lineas):
+            if "CODIGO" in linea and "ESTABLECIMIENTO" in linea:
+                linea_encabezado = i
+                break
 
-# Preparar archivo de salida
-with open(salida_txt, "w", encoding="utf-8") as f_out:
-    # f_out.write("==== FILAS DESALINEADAS ====\n\n")
+        if linea_encabezado is None:
+            print(f"Encabezado no encontrado en {nombre_archivo}")
+            continue
 
-    datos = []
-    for linea in lineas[linea_encabezado + 1:]:
-        fila = re.split(r"\s{2,}", linea)
-        if len(fila) == len(columnas):
-            datos.append(fila)
+        # Leer CSV desde la línea de encabezado encontrada
+        df = pd.read_csv(ruta, sep=";", encoding="latin1", skiprows=linea_encabezado)
 
-    # Crear DataFrame
-    df = pd.DataFrame(datos, columns=columnas)
-    f_out.write("\n==== PRIMERAS FILAS DEL DATAFRAME ====\n\n")
-    # Ver las primeras filas
-    f_out.write(df.head().to_string())
+        # Exportar todo el DataFrame a Excel
+        df.to_excel(salida_excel, index=False, sheet_name="DatosCompletos")
 
+        print(f"Exportado completo: {nombre_archivo} → {salida_excel}")
+
+    except Exception as e:
+        print(f"Error procesando {nombre_archivo}: {e}")
