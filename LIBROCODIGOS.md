@@ -3,7 +3,7 @@
 ## 1. Descripción general del conjunto de datos
 
 **Fuente de los datos:** MINEDUC–Guatemala
-
+**Fecha de extracción:** Jueves 31 de Julio
 **Contexto y propósito de la recolección:**
 Reunir los registros de todos los establecimientos educativos de Guatemala, distribuidos en 23 archivos CSV departamentales, para aplicar una limpieza estandarizada y generar un único archivo unificado (`TodosUnificados.xlsx`) que facilite análisis posteriores y garantice trazabilidad.
 
